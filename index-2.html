@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fachtagung „Lernort Schule im digitalen Wandel“ – Fediwall</title>
+  <style>
+    :root{
+      --bg:#08101f;--bg2:#0d1730;--panel:#121d3d;--panel2:#1a2750;--text:#eef3ff;--muted:#a8b6de;
+      --accent:#86b7ff;--accent2:#7ef0c5;--ok:#8cffb2;--warn:#ffd38a;--err:#ff9ea4;
+      --radius:18px;--shadow:0 12px 30px rgba(0,0,0,.28);--border:1px solid rgba(255,255,255,.08);--gap:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;min-height:100%;color:var(--text);background:radial-gradient(circle at top right, rgba(86,120,255,.14), transparent 30%),linear-gradient(180deg,var(--bg),var(--bg2) 45%,var(--bg));font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif}
+    body{display:flex;flex-direction:column}
+    header{position:sticky;top:0;z-index:30;backdrop-filter:blur(10px);background:rgba(7,12,24,.86);border-bottom:var(--border);padding:18px 22px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center}
+    .title-wrap{min-width:0}
+    h1{margin:0;font-size:clamp(1.25rem,2.2vw,2rem);line-height:1.15}
+    .subline{margin-top:6px;color:var(--muted);font-size:.96rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .toolbar{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;align-items:center}
+    button{border:0;border-radius:999px;padding:10px 14px;cursor:pointer;background:var(--panel2);color:var(--text);font-weight:700;box-shadow:var(--shadow)}
+    button:hover{filter:brightness(1.08)}
+    .chip{padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.06);color:var(--muted);font-size:.92rem}
+    .chip.ok{color:var(--ok)} .chip.warn{color:var(--warn)} .chip.err{color:var(--err)}
+    main{padding:18px;display:flex;flex-direction:column;gap:18px;flex:1}
+    .hero{display:grid;grid-template-columns:1.6fr .9fr;gap:18px}
+    .panel{background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015)),var(--panel);border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .panel-body{padding:18px}
+    .lead{font-size:1.05rem;line-height:1.45;color:var(--text);margin:0 0 10px 0}
+    .muted{color:var(--muted)}
+    .tags{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+    .tag{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:10px 14px;background:rgba(134,183,255,.12);color:var(--text);border:1px solid rgba(134,183,255,.2);font-weight:700}
+    .meta-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
+    .meta-box{background:rgba(255,255,255,.04);border:var(--border);border-radius:14px;padding:14px}
+    .meta-box strong{display:block;font-size:1.2rem;margin-bottom:4px}
+    .warning,.empty{border-radius:var(--radius);padding:18px;background:rgba(255,255,255,.04);border:var(--border);color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:var(--gap);align-items:start}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),var(--panel);border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;min-height:220px}
+    .card-head{display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:center;padding:16px;border-bottom:var(--border)}
+    .avatar{width:54px;height:54px;border-radius:50%;object-fit:cover;background:rgba(255,255,255,.08)}
+    .who{min-width:0}
+    .name{font-weight:800;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .acct,.instance,.post-meta,.post-tags{color:var(--muted);font-size:.9rem}
+    .acct{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .instance{color:var(--accent2);white-space:nowrap;padding-left:8px}
+    .card-body{display:flex;flex-direction:column;gap:12px;padding:16px}
+    .spoiler{padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.05);color:var(--warn);font-size:.92rem}
+    .text{white-space:pre-wrap;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:10;-webkit-box-orient:vertical}
+    .media-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    .media-grid:empty{display:none}
+    .media-grid img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;background:rgba(255,255,255,.06);cursor:pointer}
+    .post-meta{display:flex;flex-wrap:wrap;gap:10px 14px}
+    .card-foot{margin-top:auto;display:flex;justify-content:space-between;gap:10px;align-items:center;padding:14px 16px 16px;border-top:var(--border)}
+    .post-tags{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%;color:var(--accent2)}
+    a.link{color:var(--accent);text-decoration:none;font-weight:700}
+    .hidden{display:none !important}
+    .overlay{position:fixed;inset:0;z-index:60;background:rgba(5,9,18,.95);display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:30px}
+    .overlay h2{margin:0 0 8px 0;font-size:clamp(1.8rem,4vw,3.4rem)}
+    .overlay p{margin:0;color:var(--muted);font-size:1.1rem}
+    .lightbox{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;padding:24px}
+    .lightbox img{max-width:min(96vw,1600px);max-height:92vh;border-radius:16px;box-shadow:var(--shadow);background:#111}
+    .lightbox-close{position:fixed;top:18px;right:18px;border-radius:999px;padding:10px 14px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);color:white;cursor:pointer;font-weight:700}
+    @media (max-width:980px){.hero{grid-template-columns:1fr}}
+    @media (max-width:720px){header{grid-template-columns:1fr}.toolbar{justify-content:flex-start}.card-head{grid-template-columns:54px 1fr}.instance{grid-column:2;padding-left:0}.meta-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title-wrap">
+      <h1 id="eventTitle">Fachtagung „Lernort Schule im digitalen Wandel“ – Fediwall</h1>
+      <div class="subline" id="subline">Lade Beiträge …</div>
+    </div>
+    <div class="toolbar">
+      <div class="chip" id="statusChip">Initialisierung …</div>
+      <button id="refreshBtn">Aktualisieren</button>
+      <button id="pauseBtn">Pause</button>
+      <button id="fullscreenBtn">Vollbild</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="panel">
+        <div class="panel-body">
+          <p class="lead"><strong>Mitmachen:</strong> Beiträge mit einem dieser Hashtags posten, damit sie auf der Wall erscheinen.</p>
+          <div class="tags" id="tagList"></div>
+          <p class="muted" style="margin-top:14px">Tipp für die Tagung: Bilder wirken auf Beamer besonders gut. Öffentliche Beiträge werden automatisch aus mehreren Mastodon-Instanzen geladen.</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-body">
+          <div class="meta-grid">
+            <div class="meta-box"><strong id="countPosts">0</strong><span class="muted">Beiträge sichtbar</span></div>
+            <div class="meta-box"><strong id="countSources">0</strong><span class="muted">Instanzen aktiv</span></div>
+            <div class="meta-box"><strong id="countTags">0</strong><span class="muted">Hashtags</span></div>
+            <div class="meta-box"><strong id="countUpdated">–</strong><span class="muted">Letztes Update</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="warningBox" class="warning hidden"></div>
+    <div id="grid" class="grid"></div>
+    <div id="emptyState" class="empty hidden">Noch keine Beiträge gefunden. Prüfe Hashtags, Instanzen oder ob bereits öffentliche Beiträge vorhanden sind.</div>
+  </main>
+
+  <div id="pauseScreen" class="overlay hidden">
+    <h2>Pause</h2>
+    <p>Die Fediwall wird gleich fortgesetzt.</p>
+  </div>
+
+  <div id="lightbox" class="lightbox hidden" aria-hidden="true">
+    <button class="lightbox-close" id="lightboxClose">Schließen</button>
+    <img id="lightboxImg" alt="">
+  </div>
+
+  <script>
+    const CONFIG = {
+      eventTitle: 'Fachtagung „Lernort Schule im digitalen Wandel“ – Fediwall',
+      hashtags: ['LernortSchule','DigitaleSchule','Fachtagung','FachtagungRostock','ZukunftBeruflicheBildung','KompetenzZentrumBeruflicheSchulen','GPMSchulprojekte'],
+      instances: ['mastodon.social','chaos.social','troet.cafe','mastodon.schule'],
+      refreshMs: 30000,
+      maxPosts: 36,
+      fetchPerHashtagPerInstance: 20,
+      recentHours: 72,
+      showReplies: false,
+      showBoosts: false,
+      showMediaOnly: false,
+      blockedWords: [],
+      blockedAccounts: [],
+      rotateCards: true,
+      rotateEveryMs: 10000,
+      autoScroll: true,
+      autoScrollEveryMs: 7000,
+      autoScrollPx: 500,
+      locale: 'de-DE',
+      linkTarget: '_blank'
+    };
+
+    const state = { posts: [], paused: false, lastUpdated: null, errors: [], rotationIndex: 0 };
+    const grid = document.getElementById('grid');
+    const emptyState = document.getElementById('emptyState');
+    const warningBox = document.getElementById('warningBox');
+    const statusChip = document.getElementById('statusChip');
+    const subline = document.getElementById('subline');
+    const eventTitle = document.getElementById('eventTitle');
+    const pauseScreen = document.getElementById('pauseScreen');
+    const tagList = document.getElementById('tagList');
+    const countPosts = document.getElementById('countPosts');
+    const countSources = document.getElementById('countSources');
+    const countTags = document.getElementById('countTags');
+    const countUpdated = document.getElementById('countUpdated');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+
+    document.getElementById('refreshBtn').addEventListener('click', () => loadAll(true));
+    document.getElementById('pauseBtn').addEventListener('click', togglePause);
+    document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
+    document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+    eventTitle.textContent = CONFIG.eventTitle;
+    countSources.textContent = CONFIG.instances.length;
+    countTags.textContent = CONFIG.hashtags.length;
+    tagList.innerHTML = CONFIG.hashtags.map(tag => `<span class="tag">#${escapeHtml(tag)}</span>`).join('');
+
+    function setStatus(text, kind = '') {
+      statusChip.textContent = text;
+      statusChip.className = 'chip' + (kind ? ' ' + kind : '');
+    }
+
+    function togglePause() {
+      state.paused = !state.paused;
+      pauseScreen.classList.toggle('hidden', !state.paused);
+      document.getElementById('pauseBtn').textContent = state.paused ? 'Fortsetzen' : 'Pause';
+      setStatus(state.paused ? 'Pausiert' : 'Läuft', state.paused ? 'warn' : 'ok');
+    }
+
+    async function toggleFullscreen() {
+      if (!document.fullscreenElement) await document.documentElement.requestFullscreen().catch(() => {});
+      else await document.exitFullscreen().catch(() => {});
+    }
+
+    function fmtDate(iso) {
+      try { return new Intl.DateTimeFormat(CONFIG.locale, { dateStyle: 'short', timeStyle: 'short' }).format(new Date(iso)); }
+      catch { return iso; }
+    }
+
+    function relativeTime(iso) {
+      const diffMs = Date.now() - new Date(iso).getTime();
+      const min = Math.round(diffMs / 60000);
+      if (min < 1) return 'gerade eben';
+      if (min < 60) return `vor ${min} Min.`;
+      const h = Math.round(min / 60);
+      if (h < 24) return `vor ${h} Std.`;
+      const d = Math.round(h / 24);
+      return `vor ${d} Tag(en)`;
+    }
+
+    function stripHtml(html) {
+      const doc = new DOMParser().parseFromString(html || '', 'text/html');
+      return (doc.body.textContent || '').trim();
+    }
+
+    function normalizeTag(tag) { return String(tag || '').replace(/^#/, '').trim(); }
+    function acctWithAt(acct) { return acct.startsWith('@') ? acct : '@' + acct; }
+
+    function isRecent(iso) {
+      const cutoff = Date.now() - CONFIG.recentHours * 60 * 60 * 1000;
+      return new Date(iso).getTime() >= cutoff;
+    }
+
+    function shouldKeep(status) {
+      const s = status.reblog || status;
+      if (!isRecent(s.created_at)) return false;
+      if (!CONFIG.showReplies && s.in_reply_to_id) return false;
+      if (!CONFIG.showBoosts && !!status.reblog) return false;
+      if (CONFIG.showMediaOnly && (!s.media_attachments || s.media_attachments.length === 0)) return false;
+      const content = (stripHtml(s.content) + ' ' + (s.spoiler_text || '')).toLowerCase();
+      const acct = acctWithAt(s.account.acct).toLowerCase();
+      if (CONFIG.blockedWords.some(w => content.includes(String(w).toLowerCase()))) return false;
+      if (CONFIG.blockedAccounts.map(a => a.toLowerCase()).includes(acct)) return false;
+      return true;
+    }
+
+    function normalizeStatus(status, instance, sourceTag) {
+      const s = status.reblog || status;
+      return {
+        uniqueKey: s.url || `${instance}:${s.id}`,
+        instance, sourceTag, url: s.url, created_at: s.created_at,
+        text: stripHtml(s.content || s.text || ''),
+        spoiler: stripHtml(s.spoiler_text || ''),
+        replies_count: s.replies_count || 0,
+        reblogs_count: s.reblogs_count || 0,
+        favourites_count: s.favourites_count || 0,
+        tags: (s.tags || []).map(t => '#' + t.name),
+        media: (s.media_attachments || []).filter(m => m.type === 'image').slice(0, 4).map(m => ({ preview_url: m.preview_url || m.url, description: m.description || '' })),
+        account: { display_name: stripHtml(s.account.display_name || '') || s.account.username || s.account.acct, acct: s.account.acct, avatar: s.account.avatar }
+      };
+    }
+
+    async function fetchTagTimeline(instance, tag) {
+      const cleanTag = encodeURIComponent(normalizeTag(tag));
+      const url = `https://${instance}/api/v1/timelines/tag/${cleanTag}?limit=${CONFIG.fetchPerHashtagPerInstance}`;
+      const res = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
+      if (!res.ok) throw new Error(`${instance} → HTTP ${res.status}`);
+      return await res.json();
+    }
+
+    async function loadAll(force = false) {
+      if (state.paused && !force) return;
+      setStatus('Lade …');
+      state.errors = [];
+      const jobs = [];
+      for (const instance of CONFIG.instances) {
+        for (const tag of CONFIG.hashtags) {
+          jobs.push(fetchTagTimeline(instance, tag).then(items => ({ ok: true, instance, tag, items })).catch(error => ({ ok: false, instance, tag, error })));
+        }
+      }
+      const results = await Promise.all(jobs);
+      const map = new Map();
+      for (const result of results) {
+        if (!result.ok) { state.errors.push(`${result.instance} / #${result.tag}: ${result.error.message}`); continue; }
+        for (const raw of result.items) {
+          if (!shouldKeep(raw)) continue;
+          const post = normalizeStatus(raw, result.instance, result.tag);
+          if (!post.text && post.media.length === 0) continue;
+          map.set(post.uniqueKey, post);
+        }
+      }
+      state.posts = [...map.values()].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, CONFIG.maxPosts);
+      state.lastUpdated = new Date();
+      render();
+    }
+
+    function render() {
+      grid.innerHTML = '';
+      const tagsInfo = CONFIG.hashtags.map(t => '#' + normalizeTag(t)).join(' · ');
+      const instancesInfo = CONFIG.instances.join(', ');
+      const updated = state.lastUpdated ? fmtDate(state.lastUpdated.toISOString()) : '–';
+      subline.textContent = `${tagsInfo} | Instanzen: ${instancesInfo} | Letztes Update: ${updated}`;
+      countPosts.textContent = String(state.posts.length);
+      countUpdated.textContent = state.lastUpdated ? fmtDate(state.lastUpdated.toISOString()) : '–';
+
+      if (state.errors.length) {
+        warningBox.classList.remove('hidden');
+        warningBox.innerHTML = '<strong>Hinweis:</strong> Einige Quellen konnten nicht geladen werden.<br>' + state.errors.slice(0, 6).map(e => `• ${escapeHtml(e)}`).join('<br>');
+        setStatus(`${state.posts.length} Beiträge · mit Warnungen`, 'warn');
+      } else {
+        warningBox.classList.add('hidden');
+        warningBox.innerHTML = '';
+        setStatus(`${state.posts.length} Beiträge`, 'ok');
+      }
+
+      if (!state.posts.length) {
+        emptyState.classList.remove('hidden');
+        if (!state.errors.length) setStatus('Keine Beiträge', 'err');
+        return;
+      } else {
+        emptyState.classList.add('hidden');
+      }
+
+      let visiblePosts = state.posts;
+      if (CONFIG.rotateCards && state.posts.length > CONFIG.maxPosts / 2) {
+        const windowSize = Math.min(CONFIG.maxPosts, state.posts.length);
+        visiblePosts = circularSlice(state.posts, state.rotationIndex, windowSize);
+      }
+      for (const post of visiblePosts) grid.appendChild(renderCard(post));
+    }
+
+    function circularSlice(arr, start, count) {
+      const out = [];
+      for (let i = 0; i < count; i++) out.push(arr[(start + i) % arr.length]);
+      return out;
+    }
+
+    function renderCard(post) {
+      const card = document.createElement('article');
+      card.className = 'card';
+      const mediaHtml = post.media.map(m => `<img src="${escapeAttr(m.preview_url)}" alt="${escapeAttr(m.description || 'Bild zum Beitrag')}" data-full="${escapeAttr(m.preview_url)}">`).join('');
+      card.innerHTML = `
+        <div class="card-head">
+          <img class="avatar" src="${escapeAttr(post.account.avatar)}" alt="">
+          <div class="who">
+            <div class="name">${escapeHtml(post.account.display_name)}</div>
+            <div class="acct">${escapeHtml(acctWithAt(post.account.acct))}</div>
+          </div>
+          <div class="instance">${escapeHtml(post.instance)}</div>
+        </div>
+        <div class="card-body">
+          ${post.spoiler ? `<div class="spoiler">Hinweis: ${escapeHtml(post.spoiler)}</div>` : ''}
+          <div class="text">${escapeHtml(post.text)}</div>
+          <div class="media-grid">${mediaHtml}</div>
+          <div class="post-meta">
+            <span>${escapeHtml(relativeTime(post.created_at))}</span>
+            <span>💬 ${post.replies_count}</span>
+            <span>🔁 ${post.reblogs_count}</span>
+            <span>⭐ ${post.favourites_count}</span>
+          </div>
+        </div>
+        <div class="card-foot">
+          <div class="post-tags">${escapeHtml(post.tags.join(' '))}</div>
+          <a class="link" href="${escapeAttr(post.url)}" target="${escapeAttr(CONFIG.linkTarget)}" rel="noopener noreferrer">Beitrag öffnen</a>
+        </div>`;
+      card.querySelectorAll('img[data-full]').forEach(img => img.addEventListener('click', () => openLightbox(img.getAttribute('data-full'), img.alt || 'Bild')));
+      return card;
+    }
+
+    function openLightbox(src, alt) {
+      lightboxImg.src = src;
+      lightboxImg.alt = alt || '';
+      lightbox.classList.remove('hidden');
+      lightbox.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeLightbox() {
+      lightbox.classList.add('hidden');
+      lightbox.setAttribute('aria-hidden', 'true');
+      lightboxImg.src = '';
+      lightboxImg.alt = '';
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+    }
+
+    function escapeAttr(str) { return escapeHtml(str); }
+
+    function rotateStep() {
+      if (!CONFIG.rotateCards || state.paused) return;
+      if (state.posts.length <= Math.min(CONFIG.maxPosts, state.posts.length)) return;
+      state.rotationIndex = (state.rotationIndex + 4) % state.posts.length;
+      render();
+    }
+
+    function autoScrollStep() {
+      if (!CONFIG.autoScroll || state.paused) return;
+      window.scrollBy({ top: CONFIG.autoScrollPx, behavior: 'smooth' });
+      const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 20;
+      if (nearBottom) window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    setInterval(() => loadAll(false), CONFIG.refreshMs);
+    setInterval(() => rotateStep(), CONFIG.rotateEveryMs);
+    setInterval(() => autoScrollStep(), CONFIG.autoScrollEveryMs);
+    loadAll(true);
+  </script>
+</body>
+</html>
